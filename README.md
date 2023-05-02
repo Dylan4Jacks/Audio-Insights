@@ -24,6 +24,8 @@ Data
 - IRMAS-TrainingData.zip
 ```
 
+Extract the zip files to the same Data directory
+
 ## Usage
 
 Replace the contents of `README.md` with your project's:
