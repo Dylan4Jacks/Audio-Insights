@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+	<!-- This section gives the unauthenticated user access to all of the files that are stored in the Content folder.  -->
+	<location path="/public">
+		<system.web>
+			<authorization>
+				<allow users ="*" />
+			</authorization>
+		</system.web>
+	</location>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<link rel="stylesheet" type="text/css" href="{{ url_for('public', path='/styles.css?version=5') }}" />
+	<title>Learning Confidence API Integration</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+	<script>
+		$(document).ready(function(){
+		$("#request_btn").click(function(){
+				var reader = new FileReader();
+    			reader.onload = function (e) {
+					var objectData = {
+					input_text: $('#input_text').val(),
+					audio: reader.result.split(',')[1]              
+				};
+				var objectDataString = JSON.stringify(objectData);
+				$.ajax({
+            		type: "POST",
+            		url: "/make_post", //getUrl.protocol + "//" + getUrl.host
+            		dataType: "json",
+            		data: objectDataString,
+            		success: function (data, status) {
+						$("#test").html(JSON.stringify(data));
+						console.log(data)
+               			alert(status);
+            		},
+            		error: function (data, status) {
+             			alert(status);
+            		}
+        		});
+    			};
+    			reader.readAsDataURL($('#input_audio')[0].files[0]);
+		});
+		});
+	</script>
+	<script>
+		$(document).ready(function(){
+		$("#sample_request_btn").click(function(){
+			$.get("{{ url_for('public', path='/models/test_audio.txt') }}", function(audiodata) {
+				var objectData = {
+             		input_text: "I really like green apples",
+             		audio: audiodata               
+         		};
+				var objectDataString = JSON.stringify(objectData);
+				$.ajax({
+            		type: "POST",
+            		url: "/make_post", //getUrl.protocol + "//" + getUrl.host
+            		dataType: "json",
+            		data: objectDataString,
+            		success: function (data, status) {
+						$("#test").html(JSON.stringify(data));
+						console.log(data)
+               			alert(status);
+            		},
+            		error: function (data, status) {
+             			alert(status);
+            		}
+        		});
+			}, 'text')
+		});
+		});
+	</script>
+</head>
+
+<body>
+	<div class="container">
+		<div class="header">
+			<div class="nav">
+				<div class="nav-left">
+					<a>
+						<img src="{{ url_for('public', path='/images/nav-logo.png') }}" alt="nav-logo">
+						 <div>LC | Developer Portal</div>
+						</a>
+					<a>Getting Started</a>
+					
+				</div>
+				<div class="nav-right">
+					<a>APIs</a>
+					<a>My Dashboard</a>
+					<a>Sign Out/In</a>
+
+				</div>
+			</div>
+		</div>
+		<div class="main">
+			<div class="center-screen">
+				<div class="audio-symbol">
+					<img src="{{ url_for('public', path='/images/nav-logo.png') }}" alt="page-logo">
+				</div>
+				<div class="title-text">Language Confidence</div>
+				<div class="inputs-container">
+					<input type="text" name="input_text" id="input_text" class="inputs" placeholder="passage to be read...">
+					<input type="file" accept="audio/*" id="input_audio" class="inputs" capture>
+				</div>
+				<button name="Listen" class="listen-button" id="request_btn" onclick="">Send Request</button>
+				<button name="Listen" class="listen-button" id="sample_request_btn" onclick="">Send Sample Data</button>
+				<h3 id="test">Response Data is displayed here...</h3>
+			</div>
+		</div>
+		<div class="footer"></div>
+	</div>
+</body>
+</html>
