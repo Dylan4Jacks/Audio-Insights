@@ -1,11 +1,11 @@
 import requests
 import json
-import tensorflow_io as tfio
+import tensorflow as tf
+from tensorflow import keras
 import base64
 import io
 import os
-from tensorflow import keras
-import tensorflow as tf
+import numpy as np
 from fastapi import FastAPI, Request, Response, Form
 from requests.auth import HTTPBasicAuth
 from fastapi.responses import HTMLResponse
@@ -15,26 +15,15 @@ from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, validator
 from typing import Optional
 
+from fastapi import FastAPI, File, UploadFile
+
 app = FastAPI()
-
-def get_spectrogram(waveform):
-  # Convert the waveform to a spectrogram via a STFT.
-  spectrogram = tf.signal.stft(
-      waveform, frame_length=255, frame_step=128)
-  # Obtain the magnitude of the STFT.
-  spectrogram = tf.abs(spectrogram)
-  # Add a `channels` dimension, so that the spectrogram can be used
-  # as image-like input data with convolution layers (which expect
-  # shape (`batch_size`, `height`, `width`, `channels`).
-  spectrogram = spectrogram[..., tf.newaxis]
-  return spectrogram
-
-MODEL_NAME = 'CNN_Audio_Classifyer_Testing_Model'
 
 #html directory
 app.mount("/public", StaticFiles(directory="public"), name="public")
 templates = Jinja2Templates(directory="public/views")
-
+# Load the saved model
+imported = tf.saved_model.load('./models/GUI_model')
 @app.get("/")
 async def root():
     return RedirectResponse(url="/index")
@@ -52,39 +41,26 @@ class AudioData(BaseModel):
   input_text: str
   audio: str
 
+def base64_to_wav(base64_string):
+    audio_bytes = io.BytesIO(base64.b64decode(base64_string))
+    return tf.audio.decode_wav(audio_bytes.getvalue())
+
 @app.post("/make_post")
 async def make_request(audiodata: AudioData):
-	print(audiodata.input_text)
-	print(audiodata.audio)
+  audio_string = tf.constant(audiodata.audio, dtype=tf.string)
+  encode_string = tf.io.decode_base64(audio_string)
+  audio_tensor, sample_rate = tf.audio.decode_wav(encode_string)
+  # Get the prediction dictionary
+  prediction = imported(audio_tensor)
 
-	imported = tf.saved_model.load('./models/' + MODEL_NAME)
+  # Get the predicted class name and probability
+  #predicted_class_name = prediction['class_names'][0].numpy().decode('utf-8')
+  predicted_class_id = prediction['class_ids'][0].numpy()
+  predicted_probability = 100 * prediction['predictions'][0][0].numpy()
+  label_names = ['Piano','Voice', 'Trumpet', 'Saxophone', 'Organ' ,'Clarinent' ,'Acoutic Guitar' ,'Violin', 'Flute', 'Electric Guitar', 'Cello']
+  # Print the predicted class name and probability
+  print("Predicted class:", label_names[predicted_class_id])
+  print("Predicted probability:", '{:.2f}%'.format(predicted_probability))
 
-	x = audiodata.audio
-	x = tf.io.read_file(str(x))
-	x, sample_rate = tf.audio.decode_wav(x, desired_channels=1, desired_samples=16000,)
-	x = tf.squeeze(tf.reduce_mean(x, axis=-1, keepdims=True), axis=-1)
-	waveform = x
-	x = get_spectrogram(x)
-	x = x[tf.newaxis,...]
-
-	prediction = imported(x)
-	x_labels = ['cel' 'cla' 'flu' 'gac' 'gel' 'org' 'pia' 'sax' 'tru' 'vio' 'voi']
-	plt.bar(x_labels, tf.nn.softmax(prediction[0]))
-	plt.title('sax')
-	plt.show()
-
-	display.display(display.Audio(waveform, rate=16000))
-
-	response_json_unprocessed = json.loads(response.text)
-	print(response_json_unprocessed)
-	scores = []
-	if "error" in response_json_unprocessed:
-		return
-	for word in response_json_unprocessed["word_list"]:
-		scores.append(word['mean'])
-	response_json = {
-	'scores' : scores,
-	'av_score' : response_json_unprocessed['sentence_mean'],
-	}
-
-	return response_json
+  print("prediction")
+  return str("Predicted probability:", '{:.2f}%'.format(predicted_probability))
