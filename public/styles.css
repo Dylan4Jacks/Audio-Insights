@@ -1,0 +1,168 @@
+body{
+	margin: 0px;
+	/* font-family: verdana; */
+	font-family:  Lato, "Helvetica Neue", Arial, Helvetica, sans-serif;
+	font-size: 1.14285714rem;
+	color: white;
+	font-style: normal;
+	
+	font-weight: 20;
+	
+}
+
+.container{
+	position: absolute;
+	width: 100vw;
+	height: 100vh;
+	overflow: hidden;
+}
+
+.header{
+	background-color: #1a1c1d;
+	color: white;
+}
+.main{
+	background-color: #789;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.nav{
+	font-weight: bolder;
+	padding-top: 5px;
+	-ms-flex: 1;  /* IE 10 */  
+	display: flex;
+	justify-content: space-between;
+	text-align: center;
+	align-items: stretch;
+}
+
+
+.nav img{
+	height: 1.4em;
+	padding-right: 10px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+}
+
+.nav a{
+	vertical-align: middle;
+	margin: 10px;
+	position: relative;
+	display: flex;
+	text-align: center;
+	line-height: 1;
+}
+.nav-left{
+	display: flex;
+	justify-content: left;
+	align-items: stretch;
+}
+.nav-right{
+	display: flex;
+	justify-content: right;
+	align-items: stretch;
+}
+
+.center-screen{
+	margin: 0;
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+}
+
+.audio-symbol{
+	width: 60%;
+      height:30%;
+      margin: 5% auto;
+	  text-align: center;
+}
+
+.title-text{
+	font-size: 1.14285714rem;
+	font-weight: 400;
+	width: 100%;
+      height:30%;
+      margin: 5% auto;
+	  padding: 10px;
+	  text-align: center;
+	  
+}
+
+.post-form{
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  flex-direction: column;
+}
+.inputs-container{
+	position: relative;
+	display: inline-flex;
+	justify-content: center;
+	width: 100%;
+    height:30%;
+    margin: 1% auto;
+	padding: 10px;
+	text-align: center;
+}
+#input_text{
+	margin-right: 5px;
+}
+.listen-button{
+	width: 100%;
+    height:30%;
+    margin: 1% auto;
+	padding: 10px;
+	text-align: center;
+	font-family:  Lato, "Helvetica Neue", Arial, Helvetica, sans-serif;
+	font-size: 1.14285714rem;
+	color: white;
+	font-style: normal;
+	font-weight: 20;
+	border-radius: 15px;
+	border-style: solid;
+	border-color: #29af4b;
+	background-color: #29af4b;
+}
+.listen-button:active{
+	transform: translateY(4px);
+}
+
+.listen-button:hover{
+	border-color: #29af4a;
+	background-color: #29af4ac7;
+}
+
+#test{
+	font-size: 1.14285714rem;
+	font-weight: 400;
+	width: 100%;
+      height:30%;
+      margin: 5% auto;
+	  padding: 10px;
+	  text-align: center;
+}
+
+@media only screen and (max-width: 730px) {
+	.nav{
+		flex-direction: column;
+	}
+	.nav-left{
+		flex-direction: column;
+	}
+	.nav-right{
+		flex-direction: column;
+	}
+  }
+
+
+::-webkit-scrollbar {
+    display: none;
+}

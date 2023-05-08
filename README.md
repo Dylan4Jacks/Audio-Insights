@@ -6,7 +6,8 @@ This project is an interactable demo of the Audio Insights project
 ## Table of Contents
 
 - [Data](#Data)
-- [Usage](#usage)
+- [App](#App)
+- [Requirements](#requirements)
 - [Support](#support)
 
 ## Data
@@ -26,19 +27,31 @@ Data
 
 Extract the zip files to the same Data directory
 
-## Usage
+## Requirements
 
-Replace the contents of `README.md` with your project's:
+To update the Requirements.txt please run
+```sh
+pip3 freeze > requirements.txt  # Python3
+pip freeze > requirements.txt  # Python2
+```
 
-- Name
-- Description
-- Installation instructions
-- Usage instructions
-- Support instructions
-- Contributing instructions
-- Licence
+to install all Requirements please run
+```sh
+pip install -r requirements.txt #may not work when changing from Windows to Mac
+```
 
-Feel free to remove any sections that aren't applicable to your project.
+## Requirements
+
+To update the Requirements.txt please run
+```sh
+pip3 freeze > requirements.txt  # Python3
+pip freeze > requirements.txt  # Python2
+```
+
+to install all Requirements please run
+```sh
+pip install -r requirements.txt #may not work when changing from Windows to Mac
+```
 
 ## Support
 
