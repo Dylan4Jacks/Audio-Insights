@@ -29,9 +29,7 @@ def get_spectrogram(waveform):
   spectrogram = spectrogram[..., tf.newaxis]
   return spectrogram
 
-MODEL_NAME_DEPLOY= 'Deploy' # This is the model which us used in the App
-
-model = keras.models.load_model('./models/' + MODEL_NAME_DEPLOY)
+MODEL_NAME = 'CNN_Audio_Classifyer_Testing_Model'
 
 #html directory
 app.mount("/public", StaticFiles(directory="public"), name="public")

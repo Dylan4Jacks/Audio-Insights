@@ -22,13 +22,17 @@
 		$(document).ready(function(){
 		$("#request_btn").click(function(){
 				var reader = new FileReader();
-				reader.onload = function (e) {
-					var audio_data = btoa(reader.result);
+    			reader.onload = function (e) {
+					var objectData = {
+					input_text: $('#input_text').val(),
+					audio: reader.result.split(',')[1]              
+				};
+				var objectDataString = JSON.stringify(objectData);
 				$.ajax({
             		type: "POST",
             		url: "/make_post", //getUrl.protocol + "//" + getUrl.host
-            		dataType: "application/json",
-            		data: JSON.stringify({audio_data: audio_data}),
+            		dataType: "json",
+            		data: objectDataString,
             		success: function (data, status) {
 						$("#test").html(JSON.stringify(data));
 						console.log(data)
