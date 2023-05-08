@@ -1,9 +1,7 @@
-import requests
-import json
-import tensorflow as tf
-from tensorflow import keras
-import base64
-import io
+# import tensorflow as tf
+# from tensorflow import keras
+# import base64
+# import io
 import os
 import numpy as np
 from fastapi import FastAPI, Request, Response, Form
