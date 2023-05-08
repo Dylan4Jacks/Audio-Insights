@@ -15,7 +15,7 @@
 	</location>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<link rel="stylesheet" type="text/css" href="{{ url_for('public', path='/styles.css?version=5') }}" />
-	<title>Learning Confidence API Integration</title>
+	<title>Audio Insights</title>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 	<script>
@@ -48,7 +48,7 @@
 		$("#sample_request_btn").click(function(){
 			$.get("{{ url_for('public', path='/models/test_audio.txt') }}", function(audiodata) {
 				var objectData = {
-             		input_text: "I really like green apples",
+             		input_text: "Sax",
              		audio: audiodata               
          		};
 				var objectDataString = JSON.stringify(objectData);
@@ -79,15 +79,11 @@
 				<div class="nav-left">
 					<a>
 						<img src="{{ url_for('public', path='/images/nav-logo.png') }}" alt="nav-logo">
-						 <div>LC | Developer Portal</div>
+						 <div>Audio Insights</div>
 						</a>
-					<a>Getting Started</a>
-					
 				</div>
 				<div class="nav-right">
-					<a>APIs</a>
-					<a>My Dashboard</a>
-					<a>Sign Out/In</a>
+					<a>Help</a>
 
 				</div>
 			</div>
@@ -97,9 +93,9 @@
 				<div class="audio-symbol">
 					<img src="{{ url_for('public', path='/images/nav-logo.png') }}" alt="page-logo">
 				</div>
-				<div class="title-text">Language Confidence</div>
+				<div class="title-text">Audio Insights</div>
 				<div class="inputs-container">
-					<input type="text" name="input_text" id="input_text" class="inputs" placeholder="passage to be read...">
+					<input type="text" name="input_text" id="input_text" class="inputs" placeholder="Instrument being played...">
 					<input type="file" accept="audio/*" id="input_audio" class="inputs" capture>
 				</div>
 				<button name="Listen" class="listen-button" id="request_btn" onclick="">Send Request</button>
