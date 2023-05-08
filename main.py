@@ -42,8 +42,8 @@ class AudioData(BaseModel):
   audio: str
 
 def base64_to_wav(base64_string):
-    audio_bytes = io.BytesIO(base64.b64decode(base64_string))
-    return tf.audio.decode_wav(audio_bytes.getvalue())
+    # audio_bytes = io.BytesIO(base64.b64decode(base64_string))
+    return "TEST" #tf.audio.decode_wav(audio_bytes.getvalue())
 
 @app.post("/make_post")
 async def make_request(audiodata: AudioData):
