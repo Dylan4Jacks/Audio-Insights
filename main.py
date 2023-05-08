@@ -48,48 +48,43 @@ async def write_index(request: Request):
 async def write_home(request: Request, id: int):
     return templates.TemplateResponse("home.html", {"request": request, "id": id })
 
-class Input(BaseModel):
-    inputString: str
+class AudioData(BaseModel):
+  input_text: str
+  audio: str
 
 @app.post("/make_post")
-async def make_request(audio_data: Input):
-	audio_data_string = audio_data.inputString
-	print(audio_data_string)
-        
-	# Decode the base64-encoded audio data
-	audio_bytes = base64.b64decode(audio_data_string)
+async def make_request(audiodata: AudioData):
+	print(audiodata.input_text)
+	print(audiodata.audio)
 
-	# Load the audio data into a TensorFlow tensor
-	audio_tensor = tfio.audio.decode_wav(audio_bytes)
+	imported = tf.saved_model.load('./models/' + MODEL_NAME)
 
-	# Convert the TensorFlow tensor to a NumPy array
-	audio_array = audio_tensor.numpy()
-
-	# Create a file-like object to hold the decoded audio data
-	audio_file = io.BytesIO()
-
-	# Write the decoded audio data to the file-like object in .wav format
-	tf.io.write_file(audio_file, audio_array, name='audio.wav')
-
-	# Reset the file-like object to the beginning
-	audio_file.seek(0)
-
-    # Save the .wav file to a folder
-	folder_path = os.path.join(os.getcwd(), 'data')
-	if not os.path.exists(folder_path):
-			os.mkdir(folder_path)
-    
-	file_path = os.path.join(folder_path, 'audio.wav')
-	with open(file_path, 'wb') as f:
-			f.write(audio_file.getbuffer())
-
-	x, sample_rate = tf.audio.decode_wav(audio_file, desired_channels=1, desired_samples=16000,)
+	x = audiodata.audio
+	x = tf.io.read_file(str(x))
+	x, sample_rate = tf.audio.decode_wav(x, desired_channels=1, desired_samples=16000,)
 	x = tf.squeeze(tf.reduce_mean(x, axis=-1, keepdims=True), axis=-1)
 	waveform = x
 	x = get_spectrogram(x)
 	x = x[tf.newaxis,...]
 
-	prediction = model(x)
-	print(prediction)
-	
-	return {"message": "Received input string: " + "Revieved"} #str(prediction)
+	prediction = imported(x)
+	x_labels = ['cel' 'cla' 'flu' 'gac' 'gel' 'org' 'pia' 'sax' 'tru' 'vio' 'voi']
+	plt.bar(x_labels, tf.nn.softmax(prediction[0]))
+	plt.title('sax')
+	plt.show()
+
+	display.display(display.Audio(waveform, rate=16000))
+
+	response_json_unprocessed = json.loads(response.text)
+	print(response_json_unprocessed)
+	scores = []
+	if "error" in response_json_unprocessed:
+		return
+	for word in response_json_unprocessed["word_list"]:
+		scores.append(word['mean'])
+	response_json = {
+	'scores' : scores,
+	'av_score' : response_json_unprocessed['sentence_mean'],
+	}
+
+	return response_json
