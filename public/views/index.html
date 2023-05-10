@@ -16,70 +16,6 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<link rel="stylesheet" type="text/css" href="{{ url_for('public', path='/styles.css') }}" />
 	<title>Audio Insights</title>
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-	<script>
-		$(document).ready(function(){
-			$("#request_btn").click(function(){
-				$.ajax({
-					type: "POST",
-					url: "make_post",
-					data: "your-string",
-					contentType: "application/json",
-					success: function(response) {
-							console.log(response);
-					},
-					error: function(jqXHR, textStatus, errorThrown) {
-							console.log("Error: " + textStatus + " - " + errorThrown);
-					}
-				});
-			});
-		});
-	</script>
-	<script>
-		$(document).ready(function(){
-			$("#upload_file").click(function(){
-				const audioFile = document.querySelector('#input_audio').files[0];
-				const reader = new FileReader();
-				reader.readAsArrayBuffer(audioFile);
-				reader.onload = function() {
-					const audioContext = new AudioContext();
-					audioContext.decodeAudioData(reader.result, function(decodedData) {
-						const wavBlob = encodeWAV(decodedData);
-					});
-				};
-				$.ajax({
-					type: "POST",
-					url: "/files",
-					data: audioRecorder.forceDownload(blob, 'output.wav')
-					});
-				});
-			});
-	</script>
-	<script>
-    const audioPlayer = document.getElementById("audio-player");
-		$(document).ready(function(){
-			$("#record-btn").click(function(){
-      	navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-          const mediaRecorder = new MediaRecorder(stream);
-          mediaRecorder.start();
-          const audioChunks = [];
-          mediaRecorder.addEventListener("dataavailable", event => {
-            audioChunks.push(event.data);
-          });
-          mediaRecorder.addEventListener("stop", () => {
-            const audioBlob = new Blob(audioChunks);
-            const audioUrl = URL.createObjectURL(audioBlob);
-            audioPlayer.src = audioUrl;
-          });
-          setTimeout(() => {
-            mediaRecorder.stop();
-          }, 3000);
-        });
-    	});
-		});
-  </script>
-	<script src="{{ url_for('public', path='/javascript/vrecorder.js') }}"></script>
 </head>
 
 <body>
@@ -94,7 +30,7 @@
 				</div>
 				<div class="nav-right">
 					<a>Help</a>
-
+					
 				</div>
 			</div>
 		</div>
@@ -105,19 +41,75 @@
 				</div>
 				<div class="title-text">Audio Insights</div>
 				<div class="inputs-container">
-					<input type="text" name="input_text" id="input_text" class="inputs" placeholder="Instrument being played...">
-					<input type="file" accept="audio/*" id="input_audio" class="inputs" capture>
+					<form id="uploadform" enctype="multipart/form-data" method="post" action="#">
+						<input type="file" accept="audio/*" id="input_audio" class="inputs" capture>
+						
+					</form>
 				</div>
 				<div class="audio_display"></div>
 				<div class="audio_player"></div>
 				<button name="Listen" class="listen-button" id="request_btn" onclick="">Send Request</button>
 				<button name="Upload" class="listen-button" id="upload_file" onclick="">Upload File</button>
-				<button name="Record" class="listen-button" id="record-btn" onclick="">Record</button>
-				<button name="Play" class="listen-button" id="audio-player" controls onclick="">Play</button>
 				<h3 id="test">Response Data is displayed here...</h3>
+				<div class="display">
+				</div>
+				<div class="controllers">
+				</div>
 			</div>
 		</div>
 		<div class="footer"></div>
 	</div>
 </body>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="{{ url_for('public', path='/javascript/vrecorder.js') }}"></script>
+<script>
+	$(document).ready(function(){
+	$("#request_btn").click(function(){
+			var reader = new FileReader();
+				reader.onload = function (e) {
+				var objectData = {
+				input_text: $('#input_text').val(),
+				audio: reader.result.split(',')[1]              
+			};
+			var objectDataString = JSON.stringify(objectData);
+			$.ajax({
+							type: "POST",
+							url: "/make_post", //getUrl.protocol + "//" + getUrl.host
+							dataType: "json",
+							data: objectDataString,
+							success: function (data, status) {
+					$("#test").html(JSON.stringify(data));
+					console.log(data)
+									 alert(status);
+							},
+							error: function (data, status) {
+								 alert(status);
+							}
+					});
+				};
+				reader.readAsDataURL($('#input_audio')[0].files[0]);
+	});
+	});
+</script>
+<script>
+	$(document).ready(function(){
+		$("#upload_file").click(function(){
+			const audioFile = document.querySelector('#input_audio').files[0];
+			const reader = new FileReader();
+			reader.readAsArrayBuffer(audioFile);
+			reader.onload = function() {
+				const audioContext = new AudioContext();
+				audioContext.decodeAudioData(reader.result, function(decodedData) {
+					const wavBlob = encodeWAV(decodedData);
+					$.ajax({
+						type: "POST",
+						url: "/files",
+						data: audioRecorder.forceDownload(blob, 'output.wav')
+						});
+				});
+			};
+			
+		});
+	});
+</script>
 </html>

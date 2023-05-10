@@ -1,6 +1,6 @@
 // collect DOMs
-const display = document.querySelector('.audio_display')
-const controllerWrapper = document.querySelector('.audio_player')
+const display = document.querySelector('.display')
+const controllerWrapper = document.querySelector('.controllers')
 
 const State = ['Initial', 'Record', 'Download']
 let stateIndex = 0
