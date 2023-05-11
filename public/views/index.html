@@ -41,15 +41,12 @@
 				</div>
 				<div class="title-text">Audio Insights</div>
 				<div class="inputs-container">
-					<form id="uploadform" enctype="multipart/form-data" method="post" action="#">
-						<input type="file" accept="audio/*" id="input_audio" class="inputs" capture>
-						
+					<form id="uploadfile" action="/uploadfile/" method="post" enctype="multipart/form-data">
+						<p><input type="file" accept="audio/*" id="input_audio" class="inputs" name="audio_file">
+						<p><button type="submit" id="request_btn">Submit</button>
 					</form>
+					<button name="Listen" class="listen-button" id="request_btn" onclick="testString()">Send Request</button>
 				</div>
-				<div class="audio_display"></div>
-				<div class="audio_player"></div>
-				<button name="Listen" class="listen-button" id="request_btn" onclick="">Send Request</button>
-				<button name="Upload" class="listen-button" id="upload_file" onclick="">Upload File</button>
 				<h3 id="test">Response Data is displayed here...</h3>
 				<div class="display">
 				</div>
@@ -63,53 +60,21 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="{{ url_for('public', path='/javascript/vrecorder.js') }}"></script>
 <script>
-	$(document).ready(function(){
-	$("#request_btn").click(function(){
-			var reader = new FileReader();
-				reader.onload = function (e) {
-				var objectData = {
-				input_text: $('#input_text').val(),
-				audio: reader.result.split(',')[1]              
-			};
-			var objectDataString = JSON.stringify(objectData);
+	function testString(){
 			$.ajax({
-							type: "POST",
-							url: "/make_post", //getUrl.protocol + "//" + getUrl.host
-							dataType: "json",
-							data: objectDataString,
-							success: function (data, status) {
+				type: "POST",
+				url: "/test",
+				dataType: "text/plain",
+				data: "TESTTEST",
+				success: function (data, status) {
 					$("#test").html(JSON.stringify(data));
 					console.log(data)
-									 alert(status);
-							},
-							error: function (data, status) {
-								 alert(status);
-							}
-					});
-				};
-				reader.readAsDataURL($('#input_audio')[0].files[0]);
-	});
-	});
-</script>
-<script>
-	$(document).ready(function(){
-		$("#upload_file").click(function(){
-			const audioFile = document.querySelector('#input_audio').files[0];
-			const reader = new FileReader();
-			reader.readAsArrayBuffer(audioFile);
-			reader.onload = function() {
-				const audioContext = new AudioContext();
-				audioContext.decodeAudioData(reader.result, function(decodedData) {
-					const wavBlob = encodeWAV(decodedData);
-					$.ajax({
-						type: "POST",
-						url: "/files",
-						data: audioRecorder.forceDownload(blob, 'output.wav')
-						});
-				});
-			};
-			
-		});
-	});
+					alert(status);
+				},
+				error: function (data, status) {
+					alert(status);
+				}
+			});
+		};
 </script>
 </html>

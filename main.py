@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, File, UploadFile
+from fastapi import FastAPI, Request, File, UploadFile, HTTPException, Form
 from requests.auth import HTTPBasicAuth
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -31,10 +31,17 @@ async def write_home(request: Request, id: int):
 
 
 @app.post("/files/")
-async def create_file(file: Annotated[bytes, File()]):
-    return {"file_size": len(file)}
+async def create_file(audio_file: Annotated[bytes, File()]):
+    try:
+        return {"file_size": len(audio_file)}
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=str(e))
+    
 
 
 @app.post("/uploadfile/")
-async def create_upload_file(file: UploadFile):
-    return {"filename": file.filename}
+async def create_upload_file(audio_file: UploadFile = Form(...)):
+    try:
+        return {"filename": audio_file.filename}
+    except Exception as e:
+        raise HTTPException(status_code=422, detail=str(e))
