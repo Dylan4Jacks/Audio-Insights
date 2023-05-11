@@ -9,7 +9,7 @@
 	<location path="/public">
 		<system.web>
 			<authorization>
-				<allow users ="*" />
+				<allow users="*" />
 			</authorization>
 		</system.web>
 	</location>
@@ -25,12 +25,10 @@
 				<div class="nav-left">
 					<a>
 						<img src="{{ url_for('public', path='/images/nav-logo.png') }}" alt="nav-logo">
-						 <div>Audio Insights</div>
-						</a>
+					</a>
 				</div>
 				<div class="nav-right">
 					<a>Help</a>
-					
 				</div>
 			</div>
 		</div>
@@ -39,42 +37,65 @@
 				<div class="audio-symbol">
 					<img src="{{ url_for('public', path='/images/nav-logo.png') }}" alt="page-logo">
 				</div>
-				<div class="title-text">Audio Insights</div>
-				<div class="inputs-container">
-					<form id="uploadfile" action="/uploadfile/" method="post" enctype="multipart/form-data">
-						<p><input type="file" accept="audio/*" id="input_audio" class="inputs" name="audio_file">
-						<p><button type="submit" id="request_btn">Submit</button>
-					</form>
-					<button name="Listen" class="listen-button" id="request_btn" onclick="testString()">Send Request</button>
-				</div>
-				<h3 id="test">Response Data is displayed here...</h3>
 				<div class="display">
 				</div>
 				<div class="controllers">
 				</div>
+				<form id="form_audio" action="" method="post" enctype="multipart/form-data">
+					<p><input type="file" accept="audio/*" id="input_audio" class="inputs" name="audio_file" capture>
+					<p><button type="submit" id="button_audio" class="listen-button">Submit</button>
+				</form>
+				<h3 id="test">Response Data is displayed here...</h3>
 			</div>
+			<div class="footer"></div>
 		</div>
-		<div class="footer"></div>
-	</div>
 </body>
+
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="{{ url_for('public', path='/javascript/vrecorder.js') }}"></script>
 <script>
-	function testString(){
-			$.ajax({
-				type: "POST",
-				url: "/test",
-				dataType: "text/plain",
-				data: "TESTTEST",
-				success: function (data, status) {
-					$("#test").html(JSON.stringify(data));
-					console.log(data)
-					alert(status);
-				},
-				error: function (data, status) {
-					alert(status);
-				}
-			});
+	var form = document.getElementById('form_audio');
+	var fileSelect = document.getElementById('input_audio');
+	var uploadButton = document.getElementById('button_audio');
+	form.onsubmit = function (event) {
+		event.preventDefault();
+
+		// Update button text.
+		uploadButton.innerHTML = 'Uploading...';
+
+		const audioURL = document.querySelector('audio')
+		var audio = null;
+		// Return if no file is selected.
+		if (fileSelect.files.length > 0) {
+			audio = fileSelect.files[0];
+		}
+		if (audioURL != null) {
+			<!-- audio = audioURL.src; -->
+		}
+		if (audio == null) {
+			return;
+		}
+		// Create a new FormData object.
+		var formData = new FormData();
+
+		// Add the file to the request.
+		formData.append('audio_file', audio, audio.name);
+		// Set up the request.
+		var xhr = new XMLHttpRequest();
+		// Open the connection.
+		xhr.open('POST', '/uploadfile/', true);
+		// Set up a handler for when the request finishes.
+		xhr.onload = function () {
+			if (xhr.status === 200) {
+				// File(s) uploaded.
+				uploadButton.innerHTML = 'Upload';
+			} else {
+				alert('An error occurred!');
+			}
 		};
+		// Send the Data.
+		xhr.send(formData);
+	}
 </script>
+
 </html>
