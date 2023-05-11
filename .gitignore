@@ -70,6 +70,8 @@ env
 docs_build
 venv
 /venv
+venvProd
+/venvProd
 docs.zip
 archive.zip
 
