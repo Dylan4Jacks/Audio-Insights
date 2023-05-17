@@ -89,7 +89,7 @@
 			if (xhr.status === 200) {
 				// File(s) uploaded.
 				uploadButton.innerHTML = 'Upload';
-				$("#test").html(JSON.stringify(xhr.data));
+				$("#test").html(JSON.stringify(xhr.response));
 						console.log(xhr.data)
 			} else {
 				alert('An error occurred!');
