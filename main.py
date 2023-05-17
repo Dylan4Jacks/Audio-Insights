@@ -70,19 +70,11 @@ async def create_upload_file(audio_file: UploadFile = Form(...)):
         predictions = model(spectrogram)
         label_names = ['Piano','Voice', 'Trumpet', 'Saxophone', 'Organ' ,'Clarinent' ,'Acoutic Guitar' ,'Violin', 'Flute', 'Electric Guitar', 'Cello']
         print(label_names)
-        x_labels = ['cel', 'cla', 'flu', 'gac', 'gel', 'org', 'pia', 'sax', 'tru', 'vio', 'voi']
-        print(x_labels)
-        # Get the top 2 predictions with labels as a dictionary
         prediction_num = predictions[0].numpy()
         print(prediction_num)
-        top_indices = np.argsort(prediction_num)[-2:]
-        # top_indices = np.where(top_indices > 0.3)
-        print(top_indices)
         all_results = {label_names[i]: prediction_num[i] for i in range(len(prediction_num))}
         print(all_results)
-        top_results = {label_names[i]: prediction_num[i] for i in top_indices}
-        print(top_results)
 
-        return str({"Predictions": top_results})
+        return str({"Predictions": all_results})
     except Exception as e:
         raise HTTPException(status_code=422, detail=str(e))
