@@ -78,6 +78,7 @@ models/
 /models
 /models/*
 !models/production/
+!/models/production
 !/models/production/*
 !/models/production/**
 # vim temporary files
