@@ -1,0 +1,42 @@
+name: Deploy Specified Files to Deployment Branch
+
+on:
+  push:
+    branches:
+      - main # or your default branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Copy files to temp directory
+      run: |
+        mkdir tmp
+        cp -R models/production tmp/ 
+        cp -R public tmp/ 
+        cp .gitattributes tmp/
+        cp .gitignore tmp/
+        cp Procfile tmp/
+        cp README.md tmp/
+        cp main.py tmp/
+        cp requirements.txt tmp/
+        
+    - name: Switch to deployment branch
+      run: |
+        git checkout Production # replace with your branch name
+
+    - name: Copy files to repository
+      run: |
+        cp -R tmp/* .
+
+    - name: Commit and push
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add .
+        git commit -m "Deploy specified files to deployment branch" --allow-empty
+        git push origin Production
