@@ -14,43 +14,58 @@
 		</system.web>
 	</location>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<link rel="stylesheet" type="text/css" href="{{ url_for('public', path='/styles.css') }}" />
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 	<title>Audio Insights</title>
+
+	<style>
+		body, html {
+			height: 100%;
+			margin: 0;
+			font-family: Arial, Helvetica, sans-serif;
+		}
+		
+		* {
+			box-sizing: border-box;
+		}
+		
+		.bg-image {
+			/* The image used */
+			background-image: url("{{ url_for('public', path='/images/background-image.png') }}");
+			
+			
+			/* Full width */
+			width: 100%;
+			height: 100%; 
+			
+			/* Center and scale the image nicely */
+			background-position: center;
+			background-repeat: no-repeat;
+			background-size: cover;
+		}
+		.simple-spacing{
+			margin: 3px;
+		}
+		</style>
 </head>
 
-<body>
+<body class="bg-image">
 	<div class="container">
-		<div class="header">
-			<div class="nav">
-				<div class="nav-left">
-					<a>
-						<img src="{{ url_for('public', path='/images/nav-logo.png') }}" alt="nav-logo">
-					</a>
-				</div>
-				<div class="nav-right">
-					<a>Help</a>
-				</div>
-			</div>
-		</div>
-		<div class="main">
-			<div class="center-screen">
-				<div class="audio-symbol">
-					<img src="{{ url_for('public', path='/images/nav-logo.png') }}" alt="page-logo">
-				</div>
-				<div class="display">
-				</div>
-				<div class="controllers">
-				</div>
-				<form id="form_audio" action="" method="post" enctype="multipart/form-data">
-					<p><input type="file" accept="audio/*" id="input_audio" class="inputs" name="audio_file" capture>
-					<p><button type="submit" id="button_audio" class="listen-button">Submit</button>
-				</form>
-				<h3 id="test">Response Data is displayed here...</h3>
-			</div>
+		<div class="center-block text-center">
+			<img src="{{ url_for('public', path='/images/nav-logo.png') }}" class="img-fluid" alt="page-logo">
+			<div class="controllers simple-spacing"></div>
+			<div class="display simple-spacing"></div>
+			<form id="form_audio" class="center-block text-center" action="" method="post" enctype="multipart/form-data">
+				<div class="col-auto">
+						<input type="file" accept="audio/*" id="input_audio" class="inputs form-control simple-spacing p-1" name="audio_file" capture>
+						<button type="submit" id="button_audio" class="listen-button btn btn-primary simple-spacing">Submit</button>
+					</div>	
+			</form>
+			<h3 id="test">Response Data is displayed here...</h3>
 			<div class="footer"></div>
 		</div>
+	</div>
 </body>
-
+		
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script src="{{ url_for('public', path='/javascript/vrecorder.js') }}"></script>
 <script>
