@@ -113,7 +113,7 @@
 				// Displaying the image
 				var img = new Image();
 				img.src = 'data:image/png;base64,' + response.Image;
-				$("#test").html(JSON.stringify(response.Prediction));
+				$("#test").html(response.Prediction.replace(/\n/g, '<br/>'));
 
 				// If you want to append the image to a specific HTML element, you can do this:
 				// Assume the element has the id 'image'
