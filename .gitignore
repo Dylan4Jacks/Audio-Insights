@@ -74,7 +74,6 @@ venvProd
 /venvProd
 docs.zip
 archive.zip
-
 # vim temporary files
 *~
 .*.sw?
@@ -82,4 +81,17 @@ archive.zip
 #Data
 /Data/*
 !/Data/*.gitkeep
-models/vgg models/vgg_spectro_model.h5
+models/CNN_Audio_Classifyer_Testing_Model.h5
+models/CNN_Audio_Classifyer_Testing_Model.h5
+models/CNN_Audio_Classifyer_Testing_Model/fingerprint.pb
+models/CNN_Audio_Classifyer_Testing_Model/saved_model.pb
+models/CNN_Audio_Classifyer_Testing_Model/variables/variables.data-00000-of-00001
+models/CNN_Audio_Classifyer_Testing_Model/variables/variables.index
+models/Deploy/fingerprint.pb
+models/Deploy/keras_metadata.pb
+models/Deploy/saved_model.pb
+models/Deploy/variables/variables.data-00000-of-00001
+models/Deploy/variables/variables.index
+models/GUI_model/saved_model.pb
+models/GUI_model/variables/variables.data-00000-of-00001
+models/GUI_model/variables/variables.index
