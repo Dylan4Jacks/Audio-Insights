@@ -85,7 +85,7 @@ async def create_upload_file(audio_file: UploadFile = Form(...)):
         prediction = model(x)
         predicted_class_id = tf.argmax(prediction[0]).numpy()
         predicted_probability = 100 * prediction[0][predicted_class_id].numpy()
-        print("Predicted class ID:", x_labels[predicted_class_id])
+        print("Predicted class ID:", x_labels_full[predicted_class_id])
         print("Predicted probability:", '{:.2f}%'.format(predicted_probability))
 
 
@@ -102,7 +102,7 @@ async def create_upload_file(audio_file: UploadFile = Form(...)):
         image_base64 = base64.b64encode(buf.getvalue()).decode()
         # top_3_indices = np.argsort(predicted_probability)[-3:][::-1]
         # top_3_predictions = predicted_probability[top_3_indices]
-        all_results = {"Prediction": "Predicted class ID:" + x_labels[predicted_class_id] + "Predicted probability:" + '{:.2f}%'.format(predicted_probability), "Image": image_base64}
+        all_results = {"Prediction": "Predicted class: " + x_labels_full[predicted_class_id] + "\nPredicted probability: " + '{:.2f}%'.format(predicted_probability), "Image": image_base64}
         return all_results
     except Exception as e:
         raise HTTPException(status_code=422, detail=str(e))
