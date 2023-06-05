@@ -60,7 +60,11 @@
 						<button type="submit" id="button_audio" class="listen-button btn btn-primary simple-spacing">Submit</button>
 					</div>	
 			</form>
-			<h3 id="test">Response Data is displayed here...</h3>
+			<div class="row justify-content-center">
+				<div class="text-center mx-auto d-block" id="image">
+				</div>
+		</div>
+			<div><h3 id="test">Response Data is displayed here...</h3></div>
 			<div class="footer"></div>
 		</div>
 	</div>
@@ -104,8 +108,23 @@
 			if (xhr.status === 200) {
 				// File(s) uploaded.
 				uploadButton.innerHTML = 'Upload';
-				$("#test").html(JSON.stringify(xhr.response));
-						console.log(xhr.data)
+				var response = JSON.parse(xhr.response);
+				
+				// Displaying the image
+				var img = new Image();
+				img.src = 'data:image/png;base64,' + response.Image;
+				$("#test").html(JSON.stringify(response.Prediction));
+
+				// If you want to append the image to a specific HTML element, you can do this:
+				// Assume the element has the id 'image'
+				var parent = document.getElementById('image');
+				// Remove all child nodes
+				while (parent.firstChild) {
+						parent.removeChild(parent.firstChild);
+				}
+				// Append the new image
+				parent.appendChild(img);
+
 			} else {
 				alert('An error occurred!');
 			}

@@ -22,7 +22,7 @@ templates = Jinja2Templates(directory="public/views")
 # Load the saved model
 # imported = tf.saved_model.load('./models/GUI_model')
 fixed_length = 48000
-MODEL_NAME_DEPLOY= './models/production/resnet_model_74.h5' # This is the model which us used in the App
+MODEL_NAME_DEPLOY= './models/production/resnet_model_74v2.h5' # This is the model which us used in the App
 model = keras.models.load_model(MODEL_NAME_DEPLOY)
 
 #Spectrogram Content
@@ -56,49 +56,43 @@ async def root():
 async def write_index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+
+
+def get_spectrogram(waveform):
+  # Convert the waveform to a spectrogram via a STFT.
+  spectrogram = tf.signal.stft(
+      waveform, frame_length=255, frame_step=128)
+  # Obtain the magnitude of the STFT.
+  spectrogram = tf.abs(spectrogram)
+  # Add a `channels` dimension, so that the spectrogram can be used
+  # as image-like input data with convolution layers (which expect
+  # shape (`batch_size`, `height`, `width`, `channels`).
+  spectrogram = spectrogram[..., tf.newaxis]
+  return spectrogram
+
 @app.post("/uploadfile/")
 async def create_upload_file(audio_file: UploadFile = Form(...)):
     try:
         audio_bytes = audio_file.file.read()
-        audio_tensor, sample_rate = tf.audio.decode_wav(audio_bytes, desired_channels=1, desired_samples=fixed_length)
-        audio_tensor = tf.squeeze(audio_tensor, axis=-1)
-        audio_tensor = tf.ensure_shape(audio_tensor, (fixed_length,))
-        audio_tensor = tf.cast(audio_tensor, dtype=tf.float32)
-        print(type(audio_tensor))
-        spectrogram = tf.signal.stft(
-            audio_tensor, frame_length=255, frame_step=128)
-        spectrogram = tf.abs(spectrogram)
-        spectrogram = spectrogram[..., tf.newaxis]
+        x, sample_rate = tf.audio.decode_wav(audio_bytes, desired_channels=1, desired_samples=fixed_length,)
+        x = tf.squeeze(tf.reduce_mean(x, axis=-1, keepdims=True), axis=-1)
+        waveform = x
+        x = get_spectrogram(x)
+        x = x[tf.newaxis,...]
 
-        # prediction = imported(audio_file.file)
-        spectrogram = tf.expand_dims(spectrogram, axis=0)
-        spectrogram_list = spectrogram.numpy().tolist() #errrrror 
+        x_labels = ['pia','voi' ,'tru' ,'sax', 'org', 'cla', 'gac', 'vio', 'flu', 'gel','cel']
+        x_labels_full = ['Piano','Voice', 'Trumpet', 'Saxophone', 'Organ' ,'Clarinent' ,'Acoutic Guitar' ,'Violin', 'Flute', 'Electric Guitar', 'Cello']
+        prediction = model(x)
+        predicted_class_id = tf.argmax(prediction[0]).numpy()
+        predicted_probability = 100 * prediction[0][predicted_class_id].numpy()
+        print("Predicted class ID:", x_labels[predicted_class_id])
+        print("Predicted probability:", '{:.2f}%'.format(predicted_probability))
 
-        # Define headers with the API token
-        headers = {
-            'Content-Type': 'application/json',
-            'x-api-key': 'D6b4lE0eG672DdZtlbobS7pTaXBWF3Oj4obwMwWk'
-        }
 
-        # Create the payload for the Lambda function
-        payload = json.dumps({
-            'input_data': spectrogram_list
-        })
-        # Send the data to the Lambda function
-        # response = requests.post('https://epqxpvb6xc.execute-api.ap-southeast-2.amazonaws.com/test/dlcnn-audio-insights-lambda', headers=headers, data=payload)
+        plt.bar(x_labels, prediction[0])
+        plt.title(x_labels[predicted_class_id])
+        # plt.show()
 
-        print(type(spectrogram))
-        predictions = model(spectrogram)
-        softmax_predictions = tf.nn.softmax(predictions[0]).numpy()
-        max_index = np.argmax(softmax_predictions)
-
-        label_names = ['Piano','Voice', 'Trumpet', 'Saxophone', 'Organ' ,'Clarinent' ,'Acoutic Guitar' ,'Violin', 'Flute', 'Electric Guitar', 'Cello']
-        x_labels = ['cel', 'cla', 'flu', 'gac', 'gel', 'org', 'pia', 'sax', 'tru', 'vio', 'voi']
-        title = x_labels[max_index]
-
-        plt.bar(x_labels, softmax_predictions)
-        plt.title(title)
-        
         # Convert plot to PNG image
         buf = io.BytesIO()
         plt.savefig(buf, format='png')
@@ -106,8 +100,9 @@ async def create_upload_file(audio_file: UploadFile = Form(...)):
 
         # Encode PNG image to base64 string
         image_base64 = base64.b64encode(buf.getvalue()).decode()
-
-        all_results = {"Predictions": softmax_predictions.tolist(), "Image": image_base64}
+        # top_3_indices = np.argsort(predicted_probability)[-3:][::-1]
+        # top_3_predictions = predicted_probability[top_3_indices]
+        all_results = {"Prediction": "Predicted class ID:" + x_labels[predicted_class_id] + "Predicted probability:" + '{:.2f}%'.format(predicted_probability), "Image": image_base64}
         return all_results
     except Exception as e:
         raise HTTPException(status_code=422, detail=str(e))
