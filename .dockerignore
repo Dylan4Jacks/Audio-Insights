@@ -1,0 +1,6 @@
+**
+!models/production/**
+!public/**
+!Procfile
+!main.py
+!requirements.txt

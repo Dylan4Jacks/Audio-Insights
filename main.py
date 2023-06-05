@@ -1,10 +1,15 @@
 import tensorflow as tf
 from tensorflow import keras
 import matplotlib.pyplot as plt
+import io
+import base64
 import numpy as np
+import requests
+import json
 from fastapi import FastAPI, Request, File, UploadFile, HTTPException, Form
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 
@@ -17,7 +22,7 @@ templates = Jinja2Templates(directory="public/views")
 # Load the saved model
 # imported = tf.saved_model.load('./models/GUI_model')
 fixed_length = 48000
-MODEL_NAME_DEPLOY= './models/vgg models/vgg_spectro_model.h5' # This is the model which us used in the App
+MODEL_NAME_DEPLOY= './models/production/resnet_model_74v2.h5' # This is the model which us used in the App
 model = keras.models.load_model(MODEL_NAME_DEPLOY)
 
 #Spectrogram Content
@@ -51,30 +56,53 @@ async def root():
 async def write_index(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
+
+
+def get_spectrogram(waveform):
+  # Convert the waveform to a spectrogram via a STFT.
+  spectrogram = tf.signal.stft(
+      waveform, frame_length=255, frame_step=128)
+  # Obtain the magnitude of the STFT.
+  spectrogram = tf.abs(spectrogram)
+  # Add a `channels` dimension, so that the spectrogram can be used
+  # as image-like input data with convolution layers (which expect
+  # shape (`batch_size`, `height`, `width`, `channels`).
+  spectrogram = spectrogram[..., tf.newaxis]
+  return spectrogram
+
 @app.post("/uploadfile/")
 async def create_upload_file(audio_file: UploadFile = Form(...)):
     try:
         audio_bytes = audio_file.file.read()
-        audio_tensor, sample_rate = tf.audio.decode_wav(audio_bytes, desired_channels=1, desired_samples=fixed_length)
-        audio_tensor = tf.squeeze(audio_tensor, axis=-1)
-        audio_tensor = tf.ensure_shape(audio_tensor, (fixed_length,))
-        audio_tensor = tf.cast(audio_tensor, dtype=tf.float32)
-        print(type(audio_tensor))
-        spectrogram = tf.signal.stft(
-            audio_tensor, frame_length=255, frame_step=128)
-        spectrogram = tf.abs(spectrogram)
-        spectrogram = spectrogram[..., tf.newaxis]
+        x, sample_rate = tf.audio.decode_wav(audio_bytes, desired_channels=1, desired_samples=fixed_length,)
+        x = tf.squeeze(tf.reduce_mean(x, axis=-1, keepdims=True), axis=-1)
+        waveform = x
+        x = get_spectrogram(x)
+        x = x[tf.newaxis,...]
 
-        # prediction = imported(audio_file.file)
-        spectrogram = tf.expand_dims(spectrogram, axis=0)
-        predictions = model(spectrogram)
-        label_names = ['Piano','Voice', 'Trumpet', 'Saxophone', 'Organ' ,'Clarinent' ,'Acoutic Guitar' ,'Violin', 'Flute', 'Electric Guitar', 'Cello']
-        print(label_names)
-        prediction_num = predictions[0].numpy()
-        print(prediction_num)
-        all_results = {label_names[i]: prediction_num[i] for i in range(len(prediction_num))}
-        print(all_results)
+        x_labels = ['pia','voi' ,'tru' ,'sax', 'org', 'cla', 'gac', 'vio', 'flu', 'gel','cel']
+        x_labels_full = ['Piano','Voice', 'Trumpet', 'Saxophone', 'Organ' ,'Clarinent' ,'Acoutic Guitar' ,'Violin', 'Flute', 'Electric Guitar', 'Cello']
+        prediction = model(x)
+        predicted_class_id = tf.argmax(prediction[0]).numpy()
+        predicted_probability = 100 * prediction[0][predicted_class_id].numpy()
+        print("Predicted class ID:", x_labels[predicted_class_id])
+        print("Predicted probability:", '{:.2f}%'.format(predicted_probability))
 
-        return str({"Predictions": all_results})
+
+        plt.bar(x_labels, prediction[0])
+        plt.title(x_labels[predicted_class_id])
+        # plt.show()
+
+        # Convert plot to PNG image
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        plt.close()
+
+        # Encode PNG image to base64 string
+        image_base64 = base64.b64encode(buf.getvalue()).decode()
+        # top_3_indices = np.argsort(predicted_probability)[-3:][::-1]
+        # top_3_predictions = predicted_probability[top_3_indices]
+        all_results = {"Prediction": "Predicted class ID:" + x_labels[predicted_class_id] + "Predicted probability:" + '{:.2f}%'.format(predicted_probability), "Image": image_base64}
+        return all_results
     except Exception as e:
         raise HTTPException(status_code=422, detail=str(e))
