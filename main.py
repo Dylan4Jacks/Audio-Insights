@@ -1,10 +1,15 @@
 import tensorflow as tf
 from tensorflow import keras
 import matplotlib.pyplot as plt
+import io
+import base64
 import numpy as np
+import requests
+import json
 from fastapi import FastAPI, Request, File, UploadFile, HTTPException, Form
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.encoders import jsonable_encoder
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 
@@ -17,7 +22,7 @@ templates = Jinja2Templates(directory="public/views")
 # Load the saved model
 # imported = tf.saved_model.load('./models/GUI_model')
 fixed_length = 48000
-MODEL_NAME_DEPLOY= './models/vgg models/vgg_spectro_model.h5' # This is the model which us used in the App
+MODEL_NAME_DEPLOY= './models/production/resnet_model_74.h5' # This is the model which us used in the App
 model = keras.models.load_model(MODEL_NAME_DEPLOY)
 
 #Spectrogram Content
@@ -67,14 +72,42 @@ async def create_upload_file(audio_file: UploadFile = Form(...)):
 
         # prediction = imported(audio_file.file)
         spectrogram = tf.expand_dims(spectrogram, axis=0)
-        predictions = model(spectrogram)
-        label_names = ['Piano','Voice', 'Trumpet', 'Saxophone', 'Organ' ,'Clarinent' ,'Acoutic Guitar' ,'Violin', 'Flute', 'Electric Guitar', 'Cello']
-        print(label_names)
-        prediction_num = predictions[0].numpy()
-        print(prediction_num)
-        all_results = {label_names[i]: prediction_num[i] for i in range(len(prediction_num))}
-        print(all_results)
+        spectrogram_list = spectrogram.numpy().tolist() #errrrror 
 
-        return str({"Predictions": all_results})
+        # Define headers with the API token
+        headers = {
+            'Content-Type': 'application/json',
+            'x-api-key': 'D6b4lE0eG672DdZtlbobS7pTaXBWF3Oj4obwMwWk'
+        }
+
+        # Create the payload for the Lambda function
+        payload = json.dumps({
+            'input_data': spectrogram_list
+        })
+        # Send the data to the Lambda function
+        # response = requests.post('https://epqxpvb6xc.execute-api.ap-southeast-2.amazonaws.com/test/dlcnn-audio-insights-lambda', headers=headers, data=payload)
+
+        print(type(spectrogram))
+        predictions = model(spectrogram)
+        softmax_predictions = tf.nn.softmax(predictions[0]).numpy()
+        max_index = np.argmax(softmax_predictions)
+
+        label_names = ['Piano','Voice', 'Trumpet', 'Saxophone', 'Organ' ,'Clarinent' ,'Acoutic Guitar' ,'Violin', 'Flute', 'Electric Guitar', 'Cello']
+        x_labels = ['cel', 'cla', 'flu', 'gac', 'gel', 'org', 'pia', 'sax', 'tru', 'vio', 'voi']
+        title = x_labels[max_index]
+
+        plt.bar(x_labels, softmax_predictions)
+        plt.title(title)
+        
+        # Convert plot to PNG image
+        buf = io.BytesIO()
+        plt.savefig(buf, format='png')
+        plt.close()
+
+        # Encode PNG image to base64 string
+        image_base64 = base64.b64encode(buf.getvalue()).decode()
+
+        all_results = {"Predictions": softmax_predictions.tolist(), "Image": image_base64}
+        return all_results
     except Exception as e:
         raise HTTPException(status_code=422, detail=str(e))
