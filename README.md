@@ -1,16 +1,18 @@
 # Deep Learning & Conv Neural Net
 ## Assignment 3
 
-This project is an interactable demo of the Audio Insights project 
+_This project is an interactable demo of the Audio Insights project _
+![spec](https://github.com/Dylan4Jacks/Audio-Insights/assets/48197729/e790d287-2dfc-432e-a3f0-d2c418e4bc61)
+
 
 ## Table of Contents
 
-- [Data](#Data)
-- [App](#App)
+- [Data](#data)
 - [Requirements](#requirements)
 - [Support](#support)
 
-## Data
+## Data 
+#Data
 
 This Project has on data due to git contraints.
 To add the Training/Testing data please inser the respective .zip files inside the Data file:
