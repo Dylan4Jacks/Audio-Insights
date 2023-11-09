@@ -2,7 +2,7 @@
 ## Assignment 3
 
 _This project is an interactable demo of the Audio Insights project _
-![spec](https://github.com/Dylan4Jacks/Audio-Insights/assets/48197729/e790d287-2dfc-432e-a3f0-d2c418e4bc61)
+![spec](https://github.com/Dylan4Jacks/Audio-Insights/assets/48197729/2db739bc-8c74-47ce-9118-d78080cbedb4)
 
 
 ## Table of Contents
